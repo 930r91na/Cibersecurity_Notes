@@ -587,15 +587,15 @@ if __name__ == "__main__":
     #print_binary_data("L1", L1)
     #print_binary_data("R1", R1)
 
-    #print_section_header("COMPLETE DES ENCRYPTION")
-    
+    print_section_header("COMPLETE DES ENCRYPTION")
+
     # Perform complete DES encryption
-    #print("🔐 Running complete DES encryption (16 rounds)...")
-    #
-    #ciphertext = DES_encrypt(P, K)
-    #print_section_header("ENCRYPTION RESULT")
-    #print_binary_data("Original Plaintext", P)
-    #print_binary_data("Final Ciphertext", ciphertext)
+    print("🔐 Running complete DES encryption (16 rounds)...")
+    
+    ciphertext = DES_encrypt(P, K)
+    print_section_header("ENCRYPTION RESULT")
+    print_binary_data("Original Plaintext", P)
+    print_binary_data("Final Ciphertext", ciphertext)
     #print_section_header("DES DECRYPTION VERIFICATION")
     
 

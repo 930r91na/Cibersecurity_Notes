@@ -590,14 +590,25 @@ if __name__ == "__main__":
     #print_section_header("COMPLETE DES ENCRYPTION")
     
     # Perform complete DES encryption
-    print("🔐 Running complete DES encryption (16 rounds)...")
+    #print("🔐 Running complete DES encryption (16 rounds)...")
+    #
+    #ciphertext = DES_encrypt(P, K)
+    #print_section_header("ENCRYPTION RESULT")
+    #print_binary_data("Original Plaintext", P)
+    #print_binary_data("Final Ciphertext", ciphertext)
+    #print_section_header("DES DECRYPTION VERIFICATION")
     
-    ciphertext = DES_encrypt(P, K)
-    print_section_header("ENCRYPTION RESULT")
-    print_binary_data("Original Plaintext", P)
-    print_binary_data("Final Ciphertext", ciphertext)
-    print_section_header("DES DECRYPTION VERIFICATION")
-    
+
+    sbox = S1
+    X1 =[1,1,0,0,1,1] # 51
+    X2 =[1,1,0,0,0,1] # 21
+
+    # Demonstrate non-linearity
+    print_section_header("S-BOX NON-LINEARITY DEMONSTRATION")
+    result1, result2 = exemplify_non_linearity(sbox, X1, X2)
+    print(f"S1(X1) XOR S1(X2) = {result1} vs S1(X1 XOR X2) = {result2}")
+
+
     #Perform DES decryption to verify
     #print("🔓 Running DES decryption to verify...")
     #decrypted_plaintext = DES_decrypt(ciphertext, K)
@@ -605,11 +616,11 @@ if __name__ == "__main__":
     #print_binary_data("Decrypted Plaintext", decrypted_plaintext)
     #print_binary_data("Original Plaintext", P)
     ##Verify that decryption worked
-    if decrypted_plaintext == P:
-       print_section_header("✅ SUCCESS")
-       print("🎉 DES encryption and decryption completed successfully!")
-       print("✅ Decrypted plaintext matches original plaintext!")
-    else:
-       print_section_header("❌ ERROR")
-       print("💥 DES encryption/decryption failed!")
-       print("❌ Decrypted plaintext does NOT match original!")
+    #if decrypted_plaintext == P:
+    #   print_section_header("✅ SUCCESS")
+    #   print("🎉 DES encryption and decryption completed successfully!")
+    #   print("✅ Decrypted plaintext matches original plaintext!")
+    #else:
+    #   print_section_header("❌ ERROR")
+    #   print("💥 DES encryption/decryption failed!")
+    #   print("❌ Decrypted plaintext does NOT match original!")

@@ -34,6 +34,13 @@ def caesar_cipher_decrypt(ciphertext, shift, alphabet='ABCDEFGHIJKLMNOPQRSTUVWXY
     return caesar_cipher_encrypt(ciphertext, -shift, alphabet)
 
 
+def bfa_caesar_cipher(ciphertext, alphabet='ABCDEFGHIJKLMNOPQRSTUVWXYZ'):
+    """Brute-force attack on Caesar cipher."""
+    for shift in range(1, 26):
+        decrypted_text = caesar_cipher_decrypt(ciphertext, shift, alphabet)
+        print(f"Shift {shift}: {decrypted_text}")
+
+
 # =================== Monoalphabetic Substitution Cipher ===================#
 # Each letter in the plaintext is replaced by a letter with some fixed relationship to it.
 # The alphabet is not shifted but rather scrambled.
@@ -297,6 +304,12 @@ if __name__ == "__main__":
     print("Encrypted:", encrypted)
     decrypted = caesar_cipher_decrypt(encrypted, shift)
     print("Decrypted:", decrypted)
+
+    # Example usage brute-force attack on Caesar cipher
+    print("\n=== Brute-Force Attack on Caesar Cipher ===")
+    ciphertext = "phhw ph diwhu wkh wrjd sdubw"
+    print("Ciphertext:", ciphertext)
+    bfa_caesar_cipher(ciphertext)
 
     # Example usage monoalphabetic substitution cipher
     print("\n=== Monoalphabetic Substitution Cipher Test ===")

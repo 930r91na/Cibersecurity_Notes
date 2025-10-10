@@ -8,7 +8,108 @@
 #• two transpositions make more complex transposition.
 #• but a substitution followed by a transposition makes a new much harder cipher.
 
-def product_cipher(plaintext, keyword):
-    # Step 1: Encrypt the plaintext using the first cipher (e.g., Vigenère)
+def product_cipher_encrypt(plaintext, keyword):
+    # Step 1: Write plaintext in int values A=0, B=1,...,Z=25
+    plaintext = plaintext.replace(" ", "").upper()
+    plain_nums = [ord(c) - ord('A') for c in plaintext]
+    print(f"Plaintext:        {plaintext}")
+    
+    # Write keyword in int values A=0, B=1,...,Z=25
+    keyword = keyword.replace(" ", "").upper()
+    key_nums = [ord(c) - ord('A') for c in keyword]
+    print(f"Keyword:          {keyword}")
+
+    # Add values 
+    added = [(p + k) for p, k in zip(plain_nums, key_nums)]
+    
+    # Apply mod 26
+    modded = [x % 26 for x in added]
+    
+    # Convert back to letters
+    final_ciphertext = ''.join(chr(n + ord('A')) for n in modded)
+    
+    # Format aligned vectors
+    print("\nStep-by-step calculation:")
+    print("Plaintext nums:  ", end="")
+    for num in plain_nums:
+        print(f"{num:3d}", end="")
+    print()
+    
+    print("Keyword nums:    ", end="")
+    for num in key_nums:
+        print(f"{num:3d}", end="")
+    print()
+    
+    print("Added values:    ", end="")
+    for num in added:
+        print(f"{num:3d}", end="")
+    print()
+    
+    print("Mod 26 values:   ", end="")
+    for num in modded:
+        print(f"{num:3d}", end="")
+    print()
+    
+    print(f"\nFinal cipher:     {final_ciphertext}")
     
     return final_ciphertext
+
+def product_cipher_decrypt(ciphertext, keyword):
+    # Step 1: Write ciphertext in int values A=0, B=1,...,Z=25
+    ciphertext = ciphertext.replace(" ", "").upper()
+    cipher_nums = [ord(c) - ord('A') for c in ciphertext]
+    print(f"Ciphertext:       {ciphertext}")
+    
+    # Write keyword in int values A=0, B=1,...,Z=25
+    keyword = keyword.replace(" ", "").upper()
+    key_nums = [ord(c) - ord('A') for c in keyword]
+    print(f"Keyword:          {keyword}")
+
+    # Subtract values 
+    subtracted = [(c - k) for c, k in zip(cipher_nums, key_nums)]
+    
+    # Apply mod 26
+    modded = [x % 26 for x in subtracted]
+    
+    # Convert back to letters
+    final_plaintext = ''.join(chr(n + ord('A')) for n in modded)
+    
+    # Format aligned vectors
+    print("\nStep-by-step calculation:")
+    print("Cipher nums:     ", end="")
+    for num in cipher_nums:
+        print(f"{num:3d}", end="")
+    print()
+    
+    print("Keyword nums:    ", end="")
+    for num in key_nums:
+        print(f"{num:3d}", end="")
+    print()
+    
+    print("Subtracted vals: ", end="")
+    for num in subtracted:
+        print(f"{num:3d}", end="")
+    print()
+    
+    print("Mod 26 values:   ", end="")
+    for num in modded:
+        print(f"{num:3d}", end="")
+    print()
+    
+    print(f"\nFinal plaintext:  {final_plaintext}")
+    
+    return final_plaintext
+
+if __name__ == "__main__":
+    plaintext = "HOWAREYOU"
+    keyword = "NCBTZQARX"
+    
+    print("=" * 50)
+    print("ENCRYPTION")
+    print("=" * 50)
+    final_ciphertext = product_cipher_encrypt(plaintext, keyword)
+    
+    print("\n" + "=" * 50)
+    print("DECRYPTION")
+    print("=" * 50)
+    final_plaintext = product_cipher_decrypt(final_ciphertext, keyword)

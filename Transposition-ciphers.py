@@ -104,10 +104,13 @@ def rail_fence_cipher(mode):
 # PROBLEMS WITH ROW TRANSPOSITION CIPHER:
 # 1. Vulnerable to frequency analysis if the keyword is known or can be guessed.
 
-def row_transposition_encrypt(text, keyword):
-    key_order = sorted(range(len(keyword)), key=lambda k: keyword[k])
+def row_transposition_encrypt(text, key_order):
+    # the key order is determined by the keyword as is
+    key_order = [k-1 for k in key_order]
+    print(f"Key order based on keyword '{keyword}': {[k+1 for k in key_order]}")
+
     text = text.replace(" ", "").upper()
-    num_cols = len(keyword)
+    num_cols = len(key_order)
     num_rows = (len(text) + num_cols - 1) // num_cols
     padded_text = text.ljust(num_rows * num_cols, "X")
 
@@ -132,9 +135,11 @@ def row_transposition_encrypt(text, keyword):
         ciphertext += column_data
     return ciphertext
 
-def row_transposition_decrypt(text, keyword):
-    key_order = sorted(range(len(keyword)), key=lambda k: keyword[k])
-    num_cols = len(keyword)
+def row_transposition_decrypt(text, key_order):
+    if isinstance(key_order[0], int) and min(key_order) == 1:
+        key_order = [k-1 for k in key_order]
+    
+    num_cols = len(key_order)
     num_rows = len(text) // num_cols
     if len(text) % num_cols != 0:
         print("\n[Error] Invalid ciphertext length for the given key.")
@@ -196,7 +201,7 @@ if __name__ == "__main__":
 
     # Example usage row transposition cipher
     print("\n=== Row Transposition Cipher Test ===")
-    plaintext = "ennemyattackstonight"
+    plaintext = "enemyattackstonight"
     keyword = [3, 1, 4, 5, 2] 
     encrypted = row_transposition_encrypt(plaintext, keyword)
     print("Encrypted:", encrypted)

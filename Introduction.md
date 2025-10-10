@@ -66,4 +66,4 @@ always possible to simply try every key
 most basic attack, proportional to key size
 assume either know / recognise plain text
 
-![alt text](image.png)
+![alt text](Resources/image.png)

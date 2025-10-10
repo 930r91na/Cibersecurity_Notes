@@ -86,7 +86,7 @@ def frequency_analysis(text):
             total_letters += 1
     for char in frequency:
         frequency[char] = (frequency[char] / total_letters) * 100
-
+    # TODO: Print Count/ total number of letters
     frequency = dict(sorted(frequency.items(), key=lambda item: item[1], reverse=True))
     return frequency
 
@@ -224,6 +224,7 @@ def create_playfair_matrix(key):
 
 # Note: Decryption follows the same rules but in reverse (left for row, up for column).
 
+# TODO: Finish
 def playfair_cipher_encrypt(plaintext, key):
     matrix = create_playfair_matrix(key)
     print("Playfair Matrix for key '{}':".format(key))
@@ -238,12 +239,16 @@ def playfair_cipher_encrypt(plaintext, key):
         b = ''
         if i + 1 < len(plaintext):
             b = plaintext[i + 1]
-        if a == b or b == '':
+        if a == b:
             digraphs.append((a, 'X'))
+            i += 1
+        if b == '':
+            digraphs.append((a, 'Z'))
             i += 1
         else:
             digraphs.append((a, b))
             i += 2
+
     ciphertext = ""
     for a, b in digraphs:
         row_a, col_a = char_position[a]
@@ -306,12 +311,18 @@ if __name__ == "__main__":
     # Example usage frequency analysis
     print("\n=== Frequency Analysis Test ===")
     text = "UZQSOVUOHXMOPVGPOZPEVSGZWSZOPFPESXUDBMETSXAIZVUEPHZHMDZSHZWSFPAPPDTSVPQUZWYMXUZUHSXEPYEPOPDZSZUFPOMBZWPFUPZHMDJUDTMOHMQ"
+    text = "iq ifcc vqqr fb rdq vfllcq na rdq cfjwhwz hr bnnb hcc hwwhbsqvqbre hwq vhlq"
+    
+    print(f"Text: {text}")
     frequency = frequency_analysis(text)
     print("Frequency Analysis:", frequency)
     comparison = frequency_analysis_compare(frequency)
 
+    # text = "iq ifcc vqqr fb rdq vfllcq na rdq cfjwhwz hr bnnb hcc hwwhbsqvqbre hwq vhlq"
+    # https://5-letter-words.com/6-letter-word-finder used for guessoing
 
     # Example usage vigenere cipher
+    
     print("\n=== Vigenère Cipher Test ===")
     print("\nVigenère Table:")
     print_vigenere_table()
@@ -341,6 +352,14 @@ if __name__ == "__main__":
 
     # Example usage playfair cipher
     print("\n=== Playfair Cipher Test ===")
+    key = "crypto"
+    text = "balloons"
+
+    result = playfair_cipher_encrypt(text, key)
+    print(f"The encrypted text: {result}")
+
+    plaintext = playfair_cipher_decrypt(result, key)
+    print(f"The decrypted text: {plaintext}")
     
 
 

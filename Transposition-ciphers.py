@@ -10,6 +10,7 @@
 # PROBLEMS WITH RAIL FENCE CIPHER:
 # 1. Vulnerable to frequency analysis if the number of rails is known.
 
+# TODO: Fix for more rails 
 def rail_fence_encrypt(plaintext, num_rails):
     # Create a list of strings for each rail
     rails = ['' for _ in range(num_rails)]
@@ -118,7 +119,7 @@ if __name__ == "__main__":
     # Example usage rail fence cipher
     print("=== Rail Fence Cipher Test ===")
     plaintext = "meetmeafterthetogaparty"
-    num_rails = 2
+    num_rails = 3
     encrypted = rail_fence_encrypt(plaintext, num_rails)
     print("Encrypted:", encrypted)
     decrypted = rail_fence_decrypt(encrypted, num_rails)

@@ -95,7 +95,6 @@ S1 = [
     [4, 1, 14, 8, 13, 6, 2, 11, 15, 12, 9, 7, 3, 10, 5, 0],
     [15, 12, 8, 2, 4, 9, 1, 7, 5, 11, 3, 14, 10, 0, 6, 13],
 ]
-
 S2 = [
     [15, 1, 8, 14, 6, 11, 3, 4, 9, 7, 2, 13, 12, 0, 5, 10],
     [3, 13, 4, 7, 15, 2, 8, 14, 12, 0, 1, 10, 6, 9, 11, 5],
@@ -104,7 +103,7 @@ S2 = [
 ]
 
 S3 = [
-    [10, 0, 9, 14, 6, 3, 15, 5, 1, 13, 2, 8, 12, 7, 4, 11],
+    [10, 0, 9, 14, 6, 3, 15, 5, 1, 13, 12, 7, 11, 4, 2, 8],
     [13, 7, 0, 9, 3, 4, 6, 10, 2, 8, 5, 14, 12, 11, 15, 1],
     [13, 6, 4, 9, 8, 15, 3, 0, 11, 1, 2, 12, 5, 10, 14, 7],
     [1, 10, 13, 0, 6, 9, 8, 7, 4, 15, 14, 3, 11, 5, 2, 12],
@@ -124,15 +123,15 @@ S5 = [
     [11, 8, 12, 7, 1, 14, 2, 13, 6, 15, 0, 9, 10, 4, 5, 3],
 ]
 
-S6 = [ 
+S6 = [
     [12, 1, 10, 15, 9, 2, 6, 8, 0, 13, 3, 4, 14, 7, 5, 11],
     [10, 15, 4, 2, 7, 12, 9, 5, 6, 1, 13, 14, 0, 11, 3, 8],
     [9, 14, 15, 5, 2, 8, 12, 3, 7, 0, 4, 10, 1, 13, 11, 6],
-    [4, 3, 2, 12, 9, 5, 15, 10, 14, 1, 7, 6, 0, 8, 13, 11],
+    [4, 3, 2, 12, 9, 5, 15, 10, 11, 14, 1, 7, 6, 0, 8, 13],
 ]
 
 S7 = [
-    [4, 11, 2, 14, 15, 0, 8, 13, 3, 7, 10, 6, 12, 1, 5, 9],
+    [4, 11, 2, 14, 15, 0, 8, 13, 3, 12, 9, 7, 5, 10, 6, 1],
     [13, 0, 11, 7, 4, 9, 1, 10, 14, 3, 5, 12, 2, 15, 8, 6],
     [1, 4, 11, 13, 12, 3, 7, 14, 10, 15, 6, 8, 0, 5, 9, 2],
     [6, 11, 13, 8, 1, 4, 10, 7, 9, 5, 0, 15, 14, 2, 3, 12],
@@ -143,8 +142,7 @@ S8 = [
     [1, 15, 13, 8, 10, 3, 7, 4, 12, 5, 6, 11, 0, 14, 9, 2],
     [7, 11, 4, 1, 9, 12, 14, 2, 0, 6, 10, 13, 15, 3, 5, 8],
     [2, 1, 14, 7, 4, 10, 8, 13, 15, 12, 9, 0, 3, 5, 6, 11],
-]       
-
+]
 
 
 # Initial Permutation (IP) table
@@ -284,6 +282,7 @@ def feistel_function(R, K):
 # They provide the necessary confusion and diffusion properties that make DES resistant to various cryptanalytic attacks.
 # S1(X1) xor S2(X2) not equal to S1(X1 xor X2) this means non linearity
 
+# TODO: FINISH AND CHECK EXAM
 def exemplify_non_linearity(Sbox, X1, X2):
     """Demonstrate the non-linearity of an S-box."""
     # Convert input lists to binary strings
@@ -407,9 +406,16 @@ def applyPC2(Ci, Di):
 
 def generateSubkeys(Kab):
     # Apply PC-1 directly to 64-bit key (PC-1 automatically selects non-parity bits)
+    print_section_header("KEY GENERATION")
     KabOf56bits = applyPC1(Kab)
+    print_binary_data("Key after PC-1 (56 bits)", KabOf56bits)
+
     # Divide the key into two halves
     C0, D0 = divideKey(KabOf56bits)
+
+    print_binary_data("C0 (28 bits)", C0)
+    print_binary_data("D0 (28 bits)", D0)
+
     # List to hold the 16 subkeys
     subkeys = []
 
@@ -418,12 +424,19 @@ def generateSubkeys(Kab):
     
     # Generate 16 subkeys
     for i in range(16):
+        print_step_header(i + 1, f"Round {i + 1} Key Generation")
         # Rotate Ci and Di
+        print(f"  Left shift by {shifts[i]} positions")
         C0 = rotateLeft(C0, shifts[i])
 
+        print_binary_data(f"C{i+1} (28 bits)", C0)
+
         D0 = rotateLeft(D0, shifts[i])
+        print_binary_data(f"D{i+1} (28 bits)", D0)
+
         # Apply PC-2 to get the subkey Ki
         Ki = applyPC2(C0, D0)
+        print_binary_data("Key after PC-1 (56 bits)", KabOf56bits)
         subkeys.append(Ki)
     
     return subkeys
@@ -453,9 +466,16 @@ def DES_encrypt(P, Kab):
         # Apply the Feistel function F to R and the current subkey
         F_output = feistel_function(R, subkeys[i])
         
+        # Log xor R and F
+        print(f"  F(R, K{i+1}): {F_output}")
+
+        print(f"  L XOR F(R, K{i+1}): {[L[j] ^ F_output[j] for j in range(32)]}")
+        
         # New R is L XOR F(R, Ki)
         R = [L[j] ^ F_output[j] for j in range(32)]
-        
+        print(f"\n")
+        print_binary_data("R: ", R)
+
         # New L is the previous R
         L = previous_R
         
@@ -542,48 +562,54 @@ if __name__ == "__main__":
     print_section_header("KEY GENERATION")
     print(f"Generated {len(subkeys)} subkeys")
     print(f"Each subkey length: {len(subkeys[0])} bits")
-    print_binary_data("Subkey K1 (sample)", subkeys[0])
+    for i, subkey in enumerate(subkeys):
+        print_binary_data(f"Subkey K{i+1}", subkey)
 
-    print_section_header("DES ENCRYPTION - ROUND 1")
+    #print_section_header("DES ENCRYPTION - ROUND 1")
     
     # Initial Permutation (IP)
-    print_step_header(1, "Initial Permutation (IP)")
-    result_IP = apply_IP(P)
-    print_binary_data("After IP", result_IP)
+    # print_step_header(1, "Initial Permutation (IP)")
+    #result_IP = apply_IP(P)
+    #print_binary_data("After IP", result_IP)
 
-    # Divide the IP
-    (L0, R0) = divide_text(result_IP)
-    
-    print_step_header(2, "Split into Left and Right halves")
-    print_binary_data("L0", L0)
-    print_binary_data("R0", R0)
+    ## Divide the IP
+    #(L0, R0) = divide_text(result_IP)
+    #
+    #print_step_header(2, "Split into Left and Right halves")
+    #print_binary_data("L0", L0)
+    #print_binary_data("R0", R0)
 
-    print_section_header("COMPLETE DES ENCRYPTION")
+    ## Find R1
+    #feistel = feistel_function(R0, subkeys[0])
+    #R1 = [L0[i] ^ feistel[i] for i in range(32)]
+    #L1 = R0
+    #print_step_header(3, "After Round 1")
+    #print_binary_data("L1", L1)
+    #print_binary_data("R1", R1)
+
+    #print_section_header("COMPLETE DES ENCRYPTION")
     
     # Perform complete DES encryption
     print("🔐 Running complete DES encryption (16 rounds)...")
-    ciphertext = DES_encrypt(P, K)
     
+    ciphertext = DES_encrypt(P, K)
     print_section_header("ENCRYPTION RESULT")
     print_binary_data("Original Plaintext", P)
     print_binary_data("Final Ciphertext", ciphertext)
-    
     print_section_header("DES DECRYPTION VERIFICATION")
     
-    # Perform DES decryption to verify
-    print("🔓 Running DES decryption to verify...")
-    decrypted_plaintext = DES_decrypt(ciphertext, K)
-    
-    print_section_header("DECRYPTION RESULT")
-    print_binary_data("Decrypted Plaintext", decrypted_plaintext)
-    print_binary_data("Original Plaintext", P)
-    
-    # Verify that decryption worked
+    #Perform DES decryption to verify
+    #print("🔓 Running DES decryption to verify...")
+    #decrypted_plaintext = DES_decrypt(ciphertext, K)
+    #print_section_header("DECRYPTION RESULT")
+    #print_binary_data("Decrypted Plaintext", decrypted_plaintext)
+    #print_binary_data("Original Plaintext", P)
+    ##Verify that decryption worked
     if decrypted_plaintext == P:
-        print_section_header("✅ SUCCESS")
-        print("🎉 DES encryption and decryption completed successfully!")
-        print("✅ Decrypted plaintext matches original plaintext!")
+       print_section_header("✅ SUCCESS")
+       print("🎉 DES encryption and decryption completed successfully!")
+       print("✅ Decrypted plaintext matches original plaintext!")
     else:
-        print_section_header("❌ ERROR")
-        print("💥 DES encryption/decryption failed!")
-        print("❌ Decrypted plaintext does NOT match original!")
+       print_section_header("❌ ERROR")
+       print("💥 DES encryption/decryption failed!")
+       print("❌ Decrypted plaintext does NOT match original!")

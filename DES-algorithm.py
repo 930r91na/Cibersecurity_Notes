@@ -452,14 +452,23 @@ def DES_encrypt(P, Kab):
     # Generate subkeys using the binary key K
     subkeys = generateSubkeys(Kab)
     
+    print_section_header("DES ENCRYPTION PROCESS")
+    
     # Initial Permutation (IP)
+    print_step_header(0, "Initial Permutation (IP)")
     permuted_P = apply_IP(P)
+    print_binary_data("After IP", permuted_P)
     
     # Divide the permuted plaintext into two halves
     L, R = divide_text(permuted_P)
     
+    print_step_header(0, "Initial Split - Round 0")
+    print_binary_data("L0", L)
+    print_binary_data("R0", R)
+    
     # Perform 16 rounds of the Feistel function
     for i in range(16):
+        print_step_header(i + 1, f"Round {i + 1}")
         # Save the current R to use as the new L
         previous_R = R
         

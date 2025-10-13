@@ -5,6 +5,7 @@
 # It is a block cipher type 
 
 # Import formatting utilities for better output display
+import time
 from formatting_utils import (
     format_binary_grouped,
     binary_to_hex,
@@ -282,7 +283,6 @@ def feistel_function(R, K):
 # They provide the necessary confusion and diffusion properties that make DES resistant to various cryptanalytic attacks.
 # S1(X1) xor S2(X2) not equal to S1(X1 xor X2) this means non linearity
 
-# TODO: FINISH AND CHECK EXAM
 def exemplify_non_linearity(Sbox, X1, X2):
     """Demonstrate the non-linearity of an S-box."""
     # Convert input lists to binary strings
@@ -292,18 +292,60 @@ def exemplify_non_linearity(Sbox, X1, X2):
     def int_to_bits(value, length):
         return [(value >> (length - 1 - i)) & 1 for i in range(length)]
     
+    print(f"📋 S-BOX NON-LINEARITY ANALYSIS")
+    print(f"X1 = {X1} → {format_binary_grouped(X1, 6)}")
+    print(f"X2 = {X2} → {format_binary_grouped(X2, 6)}")
+    
+    # Extract row and column for X1
+    row1 = bits_to_int([X1[0], X1[5]])
+    col1 = bits_to_int(X1[1:5])
+    print(f"\n🔍 X1 Analysis:")
+    print(f"   Row bits: [{X1[0]}, {X1[5]}] = {row1}")
+    print(f"   Col bits: {X1[1:5]} = {col1}")
+    
     # Calculate S(X1) and S(X2)
-    S_X1 = Sbox[bits_to_int([X1[0], X1[5]])][bits_to_int(X1[1:5])]
-    S_X2 = Sbox[bits_to_int([X2[0], X2[5]])][bits_to_int(X2[1:5])]
+    S_X1 = Sbox[row1][col1]
+    print(f"   S(X1) = S-box[{row1}][{col1}] = {S_X1}")
+    
+    # Extract row and column for X2
+    row2 = bits_to_int([X2[0], X2[5]])
+    col2 = bits_to_int(X2[1:5])
+    print(f"\n🔍 X2 Analysis:")
+    print(f"   Row bits: [{X2[0]}, {X2[5]}] = {row2}")
+    print(f"   Col bits: {X2[1:5]} = {col2}")
+    
+    S_X2 = Sbox[row2][col2]
+    print(f"   S(X2) = S-box[{row2}][{col2}] = {S_X2}")
     
     # Calculate S(X1) XOR S(X2)
     S_X1_XOR_S_X2 = S_X1 ^ S_X2
+    print(f"\n⊕ S(X1) XOR S(X2):")
+    print(f"   {S_X1} ⊕ {S_X2} = {S_X1_XOR_S_X2}")
     
     # Calculate X1 XOR X2
     X1_XOR_X2 = [X1[i] ^ X2[i] for i in range(6)]
+    print(f"\n⊕ X1 XOR X2:")
+    print(f"   {X1} ⊕ {X2} = {X1_XOR_X2} → {format_binary_grouped(X1_XOR_X2, 6)}")
+    
+    # Extract row and column for X1 XOR X2
+    row_xor = bits_to_int([X1_XOR_X2[0], X1_XOR_X2[5]])
+    col_xor = bits_to_int(X1_XOR_X2[1:5])
+    print(f"\n🔍 (X1 XOR X2) Analysis:")
+    print(f"   Row bits: [{X1_XOR_X2[0]}, {X1_XOR_X2[5]}] = {row_xor}")
+    print(f"   Col bits: {X1_XOR_X2[1:5]} = {col_xor}")
     
     # Calculate S(X1 XOR X2)
-    S_X1_XOR_X2 = Sbox[bits_to_int([X1_XOR_X2[0], X1_XOR_X2[5]])][bits_to_int(X1_XOR_X2[1:5])]
+    S_X1_XOR_X2 = Sbox[row_xor][col_xor]
+    print(f"   S(X1 XOR X2) = S-box[{row_xor}][{col_xor}] = {S_X1_XOR_X2}")
+    
+    print(f"\n🎯 NON-LINEARITY RESULT:")
+    print(f"   S(X1) ⊕ S(X2) = {S_X1_XOR_S_X2}")
+    print(f"   S(X1 ⊕ X2)    = {S_X1_XOR_X2}")
+    
+    if S_X1_XOR_S_X2 != S_X1_XOR_X2:
+        print(f"   ✅ NON-LINEAR: S(X1) ⊕ S(X2) ≠ S(X1 ⊕ X2) ({S_X1_XOR_S_X2} ≠ {S_X1_XOR_X2})")
+    else:
+        print(f"   ❌ LINEAR: S(X1) ⊕ S(X2) = S(X1 ⊕ X2) ({S_X1_XOR_S_X2} = {S_X1_XOR_X2})")
     
     return S_X1_XOR_S_X2, S_X1_XOR_X2
 
@@ -407,6 +449,8 @@ def applyPC2(Ci, Di):
 def generateSubkeys(Kab):
     # Apply PC-1 directly to 64-bit key (PC-1 automatically selects non-parity bits)
     print_section_header("KEY GENERATION")
+    print_binary_data("Original Key Kab (64 bits)", Kab)
+
     KabOf56bits = applyPC1(Kab)
     print_binary_data("Key after PC-1 (56 bits)", KabOf56bits)
 
@@ -436,7 +480,7 @@ def generateSubkeys(Kab):
 
         # Apply PC-2 to get the subkey Ki
         Ki = applyPC2(C0, D0)
-        print_binary_data("Key after PC-1 (56 bits)", KabOf56bits)
+        print_binary_data(f"Subkey K{i+1} (48 bits)", Ki)
         subkeys.append(Ki)
     
     return subkeys
@@ -548,6 +592,9 @@ if __name__ == "__main__":
     print(f"Original key length: {len(Kab)} bits")
     
     Plaintext = "0123456789ABCDEF"
+    Plaintext = "ABCDEFABCDEF1234"
+    Plaintext = "FFFFFFFF00000000"
+    
     Key_hex = 0x133457799BBCDFF1
 
     # Convert hex string to integer
@@ -567,13 +614,16 @@ if __name__ == "__main__":
     print_binary_data("Key", K)
     
     # Generate subkeys using the binary key K
+    start = time.time()
     subkeys = generateSubkeys(K)
-    print_section_header("KEY GENERATION")
-    print(f"Generated {len(subkeys)} subkeys")
-    print(f"Each subkey length: {len(subkeys[0])} bits")
-    for i, subkey in enumerate(subkeys):
-        print_binary_data(f"Subkey K{i+1}", subkey)
-
+    end = time.time()
+    print(f"\n⏱ Key generation time: {end - start:.6f} seconds")
+    #print_section_header("KEY GENERATION")
+    #print(f"Generated {len(subkeys)} subkeys")
+    #print(f"Each subkey length: {len(subkeys[0])} bits")
+    #for i, subkey in enumerate(subkeys):
+    #    print_binary_data(f"Subkey K{i+1}", subkey)
+#
     #print_section_header("DES ENCRYPTION - ROUND 1")
     
     # Initial Permutation (IP)
@@ -596,27 +646,31 @@ if __name__ == "__main__":
     #print_binary_data("L1", L1)
     #print_binary_data("R1", R1)
 
-    print_section_header("COMPLETE DES ENCRYPTION")
-
+    #print_section_header("COMPLETE DES ENCRYPTION")
+#
     # Perform complete DES encryption
-    print("🔐 Running complete DES encryption (16 rounds)...")
-    
-    ciphertext = DES_encrypt(P, K)
-    print_section_header("ENCRYPTION RESULT")
-    print_binary_data("Original Plaintext", P)
-    print_binary_data("Final Ciphertext", ciphertext)
+    #print("🔐 Running complete DES encryption (16 rounds)...")
+    #
+    #ciphertext = DES_encrypt(P, K)
+    #print_section_header("ENCRYPTION RESULT")
+    #print_binary_data("Original Plaintext", P)
+    #print_binary_data("Final Ciphertext", ciphertext)
     #print_section_header("DES DECRYPTION VERIFICATION")
+    #
+#
+    #sbox = S2
+    #X1 =[1,1,0,0,1,1] # 51
+    #X2 =[1,1,0,0,0,1] # 21
+    #X1 = [1,1,1,1,1,1] # 51
+    #X2 = [1,0,1,0,1,0] # 21
+#
     
-
-    sbox = S1
-    X1 =[1,1,0,0,1,1] # 51
-    X2 =[1,1,0,0,0,1] # 21
 
     # Demonstrate non-linearity
-    print_section_header("S-BOX NON-LINEARITY DEMONSTRATION")
-    result1, result2 = exemplify_non_linearity(sbox, X1, X2)
-    print(f"S1(X1) XOR S1(X2) = {result1} vs S1(X1 XOR X2) = {result2}")
-
+    #print_section_header("S-BOX NON-LINEARITY DEMONSTRATION")
+    #result1, result2 = exemplify_non_linearity(sbox, X1, X2)
+    #print(f"S2(X1) XOR S2(X2) = {result1} vs S2(X1 XOR X2) = {result2}")
+#
 
     #Perform DES decryption to verify
     #print("🔓 Running DES decryption to verify...")

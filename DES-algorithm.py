@@ -2,10 +2,19 @@
 # Data Encryption Standard (DES) is a symmetric-key algorithm for the encryption of digital data.
 # It operates on fixed-size blocks of data (64 bits) and uses a 56-bit key for encryption and decryption.
 # DES is based on a Feistel network structure and consists of multiple rounds of permutation and substitution operations.
-# It is a block cipher type 
+# It is a block cipher type
+
+# USAGE MODES:
+#   Normal Mode:    python DES-algorithm.py
+#                   Shows concise summary with key generation, encrypted/decrypted results
+#   
+#   Debug Mode:     python DES-algorithm.py --debug
+#                   Shows detailed step-by-step execution including all intermediate values
+#                   Useful for learning, debugging, and understanding the algorithm flow 
 
 # Import formatting utilities for better output display
 import time
+import sys
 from formatting_utils import (
     format_binary_grouped,
     binary_to_hex,
@@ -13,6 +22,9 @@ from formatting_utils import (
     print_binary_data,
     print_step_header
 )
+
+# Global debug flag - set to True for detailed step-by-step output, False for summary only
+DEBUG_MODE = False
 
 # Block cypher example
 # Message to be encrypted is processed in blocks of fixed size (64 bits for DES)
@@ -220,29 +232,34 @@ def apply_P_permutation(block32):
 def feistel_function(R, K):
     """Feistel function F that takes a 32-bit half-block R and a 48-bit subkey K."""
 
-    print("      🔄 FEISTEL FUNCTION DETAILS")
-    print_binary_data("      Input R", R, show_hex=False)
-    print_binary_data("      Input K", K, show_hex=False)
+    if DEBUG_MODE:
+        print("      🔄 FEISTEL FUNCTION DETAILS")
+        print_binary_data("      Input R", R, show_hex=False)
+        print_binary_data("      Input K", K, show_hex=False)
     
     # Step 1: Expand R from 32 to 48 bits
     expanded_R = apply_expansion(R)
-    print("\n      📈 Expansion:")
-    print_binary_data("      Expanded R", expanded_R, show_hex=False)
+    if DEBUG_MODE:
+        print("\n      📈 Expansion:")
+        print_binary_data("      Expanded R", expanded_R, show_hex=False)
 
     # Step 2: XOR with the subkey K
     xor_result = [expanded_R[i] ^ K[i] for i in range(48)]
-    print("\n      ⊕ XOR with subkey:")
-    print_binary_data("      XOR result", xor_result, show_hex=False)
+    if DEBUG_MODE:
+        print("\n      ⊕ XOR with subkey:")
+        print_binary_data("      XOR result", xor_result, show_hex=False)
     
     # Step 3: Apply the S-boxes
-    print("\n      📦 S-BOX SUBSTITUTIONS:")
+    if DEBUG_MODE:
+        print("\n      📦 S-BOX SUBSTITUTIONS:")
     sbox_output = []
     for i in range(8):
         block = xor_result[i*6:(i+1)*6]
         
         # Ensure all values in block are 0 or 1
         if any(bit not in [0, 1] for bit in block):
-            print(f"      ERROR: Block contains non-binary values: {block}")
+            if DEBUG_MODE:
+                print(f"      ERROR: Block contains non-binary values: {block}")
             return None
             
         row = (block[0] << 1) | block[5]
@@ -265,16 +282,19 @@ def feistel_function(R, K):
         elif i == 7:
             sbox_value = S8[row][col]
         
-        print(f"      S{i+1}: {format_binary_grouped(block, 6)} → Row {row}, Col {col:2d} → {sbox_value:2d} → {format_binary_grouped([(sbox_value >> j) & 1 for j in reversed(range(4))], 4)}")
+        if DEBUG_MODE:
+            print(f"      S{i+1}: {format_binary_grouped(block, 6)} → Row {row}, Col {col:2d} → {sbox_value:2d} → {format_binary_grouped([(sbox_value >> j) & 1 for j in reversed(range(4))], 4)}")
         sbox_output.extend([(sbox_value >> j) & 1 for j in reversed(range(4))])
     
     # Step 4: Apply the P permutation (CRITICAL for DES security!)
-    print("\n      🔄 P-PERMUTATION:")
-    print_binary_data("      Before P", sbox_output, show_hex=False)
+    if DEBUG_MODE:
+        print("\n      🔄 P-PERMUTATION:")
+        print_binary_data("      Before P", sbox_output, show_hex=False)
     
     # Apply P-permutation to the 32-bit S-box output
     p_output = apply_P_permutation(sbox_output)
-    print_binary_data("      After P", p_output, show_hex=False)
+    if DEBUG_MODE:
+        print_binary_data("      After P", p_output, show_hex=False)
     
     return p_output
 
@@ -448,17 +468,20 @@ def applyPC2(Ci, Di):
 
 def generateSubkeys(Kab):
     # Apply PC-1 directly to 64-bit key (PC-1 automatically selects non-parity bits)
-    print_section_header("KEY GENERATION")
-    print_binary_data("Original Key Kab (64 bits)", Kab)
+    if DEBUG_MODE:
+        print_section_header("KEY GENERATION")
+        print_binary_data("Original Key Kab (64 bits)", Kab)
 
     KabOf56bits = applyPC1(Kab)
-    print_binary_data("Key after PC-1 (56 bits)", KabOf56bits)
+    if DEBUG_MODE:
+        print_binary_data("Key after PC-1 (56 bits)", KabOf56bits)
 
     # Divide the key into two halves
     C0, D0 = divideKey(KabOf56bits)
 
-    print_binary_data("C0 (28 bits)", C0)
-    print_binary_data("D0 (28 bits)", D0)
+    if DEBUG_MODE:
+        print_binary_data("C0 (28 bits)", C0)
+        print_binary_data("D0 (28 bits)", D0)
 
     # List to hold the 16 subkeys
     subkeys = []
@@ -468,19 +491,23 @@ def generateSubkeys(Kab):
     
     # Generate 16 subkeys
     for i in range(16):
-        print_step_header(i + 1, f"Round {i + 1} Key Generation")
-        # Rotate Ci and Di
-        print(f"  Left shift by {shifts[i]} positions")
+        if DEBUG_MODE:
+            print_step_header(i + 1, f"Round {i + 1} Key Generation")
+            # Rotate Ci and Di
+            print(f"  Left shift by {shifts[i]} positions")
         C0 = rotateLeft(C0, shifts[i])
 
-        print_binary_data(f"C{i+1} (28 bits)", C0)
+        if DEBUG_MODE:
+            print_binary_data(f"C{i+1} (28 bits)", C0)
 
         D0 = rotateLeft(D0, shifts[i])
-        print_binary_data(f"D{i+1} (28 bits)", D0)
+        if DEBUG_MODE:
+            print_binary_data(f"D{i+1} (28 bits)", D0)
 
         # Apply PC-2 to get the subkey Ki
         Ki = applyPC2(C0, D0)
-        print_binary_data(f"Subkey K{i+1} (48 bits)", Ki)
+        if DEBUG_MODE:
+            print_binary_data(f"Subkey K{i+1} (48 bits)", Ki)
         subkeys.append(Ki)
     
     return subkeys
@@ -491,50 +518,54 @@ def divide_text(chunk64bits):
     Ri = chunk64bits[32:64]
     return Li, Ri
 
-def DES_encrypt(P, Kab):
-    """Encrypts a 64-bit plaintext P using the 64-bit key Kab."""
-    # Generate subkeys using the binary key K
-    subkeys = generateSubkeys(Kab)
-    
-    print_section_header("DES ENCRYPTION PROCESS")
+def DES_encrypt(P, subkeys):
+    """Encrypts a 64-bit plaintext P using pre-generated subkeys."""
+    if DEBUG_MODE:
+        print_section_header("DES ENCRYPTION PROCESS")
     
     # Initial Permutation (IP)
-    print_step_header(0, "Initial Permutation (IP)")
+    if DEBUG_MODE:
+        print_step_header(0, "Initial Permutation (IP)")
     permuted_P = apply_IP(P)
-    print_binary_data("After IP", permuted_P)
+    if DEBUG_MODE:
+        print_binary_data("After IP", permuted_P)
     
     # Divide the permuted plaintext into two halves
     L, R = divide_text(permuted_P)
     
-    print_step_header(0, "Initial Split - Round 0")
-    print_binary_data("L0", L)
-    print_binary_data("R0", R)
+    if DEBUG_MODE:
+        print_step_header(0, "Initial Split - Round 0")
+        print_binary_data("L0", L)
+        print_binary_data("R0", R)
     
     # Perform 16 rounds of the Feistel function
     for i in range(16):
-        print_step_header(i + 1, f"Round {i + 1}")
+        if DEBUG_MODE:
+            print_step_header(i + 1, f"Round {i + 1}")
         # Save the current R to use as the new L
         previous_R = R
         
         # Apply the Feistel function F to R and the current subkey
         F_output = feistel_function(R, subkeys[i])
         
-        # Log xor R and F
-        print(f"  F(R, K{i+1}): {F_output}")
-
-        print(f"  L XOR F(R, K{i+1}): {[L[j] ^ F_output[j] for j in range(32)]}")
+        if DEBUG_MODE:
+            # Log xor R and F
+            print(f"  F(R, K{i+1}): {F_output}")
+            print(f"  L XOR F(R, K{i+1}): {[L[j] ^ F_output[j] for j in range(32)]}")
         
         # New R is L XOR F(R, Ki)
         R = [L[j] ^ F_output[j] for j in range(32)]
-        print(f"\n")
-        print_binary_data("R: ", R)
+        if DEBUG_MODE:
+            print(f"\n")
+            print_binary_data("R: ", R)
 
         # New L is the previous R
         L = previous_R
         
-        print_step_header(i + 1, f"After Round {i + 1}")
-        print_binary_data("L", L)
-        print_binary_data("R", R)
+        if DEBUG_MODE:
+            print_step_header(i + 1, f"After Round {i + 1}")
+            print_binary_data("L", L)
+            print_binary_data("R", R)
     
     # IMPORTANT: In DES, after the 16th round, we combine R + L (not L + R)
     # This is because there's no swap after the final round
@@ -545,10 +576,8 @@ def DES_encrypt(P, Kab):
     
     return C
 
-def DES_decrypt(C, Kab):
-    """Decrypts a 64-bit ciphertext C using the 64-bit key Kab."""
-    # Decryption process is similar to encryption but with subkeys applied in reverse order
-    subkeys = generateSubkeys(Kab)[::-1]  # Reverse the subkeys for decryption
+def DES_decrypt(C, subkeys):
+    """Decrypts a 64-bit ciphertext C using pre-generated subkeys (in reverse order)."""
 
     # Initial Permutation (IP)
     permuted_C = apply_IP(C)
@@ -570,9 +599,10 @@ def DES_decrypt(C, Kab):
         # New L is the previous R
         L = previous_R
 
-        print_step_header(i + 1, f"After Round {i + 1}")
-        print_binary_data("L", L)
-        print_binary_data("R", R)
+        if DEBUG_MODE:
+            print_step_header(i + 1, f"After Round {i + 1}")
+            print_binary_data("L", L)
+            print_binary_data("R", R)
 
     # IMPORTANT: In DES, after the 16th round, we combine R + L (not L + R)
     # This is because there's no swap after the final round
@@ -586,15 +616,20 @@ def DES_decrypt(C, Kab):
 
 # Test the key generation
 if __name__ == "__main__":
+    # Check for command-line debug flag
+    if len(sys.argv) > 1 and sys.argv[1].lower() in ['--debug', '-d', 'debug']:
+        DEBUG_MODE = True
+    else:
+        # Enable/Disable debug mode - set to True for detailed output, False for summary only
+        DEBUG_MODE = False  # Change this to True for detailed output
+    
     print_section_header("DES ALGORITHM TEST", '=')
+    print(f"Debug Mode: {'ENABLED (detailed steps)' if DEBUG_MODE else 'DISABLED (summary only)'}")
+    if not DEBUG_MODE:
+        print("💡 Use 'python DES-algorithm.py --debug' for detailed step-by-step output")
     
-    # Key Setup
-    print(f"Original key length: {len(Kab)} bits")
-    
+    # Test data setup
     Plaintext = "0123456789ABCDEF"
-    Plaintext = "ABCDEFABCDEF1234"
-    Plaintext = "FFFFFFFF00000000"
-    
     Key_hex = 0x133457799BBCDFF1
 
     # Convert hex string to integer
@@ -606,84 +641,69 @@ if __name__ == "__main__":
     # Convert hex to binary key
     K = [(Key_hex >> i) & 1 for i in reversed(range(64))]
     
-    print_section_header("INPUT DATA")
-    print(f"Plaintext (HEX): {Plaintext}")
-    print_binary_data("Plaintext", P)
-    
-    print(f"\nKey (HEX): {hex(Key_hex).upper().replace('0X', '0x')}")
-    print_binary_data("Key", K)
+    if DEBUG_MODE:
+        print_section_header("INPUT DATA")
+        print(f"Plaintext (HEX): {Plaintext}")
+        print_binary_data("Plaintext", P)
+        print(f"\nKey (HEX): {hex(Key_hex).upper().replace('0X', '0x')}")
+        print_binary_data("Key", K)
     
     # Generate subkeys using the binary key K
-    start = time.time()
+    if not DEBUG_MODE:
+        print_section_header("KEY GENERATION")
+    start_time = time.time()
     subkeys = generateSubkeys(K)
-    end = time.time()
-    print(f"\n⏱ Key generation time: {end - start:.6f} seconds")
-    #print_section_header("KEY GENERATION")
-    #print(f"Generated {len(subkeys)} subkeys")
-    #print(f"Each subkey length: {len(subkeys[0])} bits")
-    #for i, subkey in enumerate(subkeys):
-    #    print_binary_data(f"Subkey K{i+1}", subkey)
-#
-    #print_section_header("DES ENCRYPTION - ROUND 1")
+    end_time = time.time()
+    if not DEBUG_MODE:
+        print(f"Generated {len(subkeys)} subkeys in {end_time - start_time:.6f} seconds")
+    else:
+        print(f"\n⏱ Key generation time: {end_time - start_time:.6f} seconds")
+
+    # Encryption
+    print_section_header("ENCRYPTION")
+    if not DEBUG_MODE:
+        print(f"Plaintext: {Plaintext}")
     
-    # Initial Permutation (IP)
-    # print_step_header(1, "Initial Permutation (IP)")
-    #result_IP = apply_IP(P)
-    #print_binary_data("After IP", result_IP)
-
-    ## Divide the IP
-    #(L0, R0) = divide_text(result_IP)
-    #
-    #print_step_header(2, "Split into Left and Right halves")
-    #print_binary_data("L0", L0)
-    #print_binary_data("R0", R0)
-
-    ## Find R1
-    #feistel = feistel_function(R0, subkeys[0])
-    #R1 = [L0[i] ^ feistel[i] for i in range(32)]
-    #L1 = R0
-    #print_step_header(3, "After Round 1")
-    #print_binary_data("L1", L1)
-    #print_binary_data("R1", R1)
-
-    #print_section_header("COMPLETE DES ENCRYPTION")
-#
-    # Perform complete DES encryption
-    #print("🔐 Running complete DES encryption (16 rounds)...")
-    #
-    #ciphertext = DES_encrypt(P, K)
-    #print_section_header("ENCRYPTION RESULT")
-    #print_binary_data("Original Plaintext", P)
-    #print_binary_data("Final Ciphertext", ciphertext)
-    #print_section_header("DES DECRYPTION VERIFICATION")
-    #
-#
-    #sbox = S2
-    #X1 =[1,1,0,0,1,1] # 51
-    #X2 =[1,1,0,0,0,1] # 21
-    #X1 = [1,1,1,1,1,1] # 51
-    #X2 = [1,0,1,0,1,0] # 21
-#
+    ciphertext = DES_encrypt(P, subkeys)
     
+    if DEBUG_MODE:
+        print_section_header("ENCRYPTION RESULT")
+        print_binary_data("Original Plaintext", P)
+        print_binary_data("Final Ciphertext", ciphertext)
+    else:
+        cipher_hex = binary_to_hex(ciphertext)
+        print(f"  → Encrypted: {cipher_hex}")
 
-    # Demonstrate non-linearity
-    #print_section_header("S-BOX NON-LINEARITY DEMONSTRATION")
-    #result1, result2 = exemplify_non_linearity(sbox, X1, X2)
-    #print(f"S2(X1) XOR S2(X2) = {result1} vs S2(X1 XOR X2) = {result2}")
-#
+    # Decryption Test  
+    print_section_header("DECRYPTION")
+    # Create reversed subkeys for decryption
+    subkeys_decrypt = subkeys[::-1]  # Reverse the subkeys for decryption
+    
+    if not DEBUG_MODE:
+        cipher_hex = binary_to_hex(ciphertext)
+        print(f"Ciphertext: {cipher_hex}")
+    
+    decrypted_plaintext = DES_decrypt(ciphertext, subkeys_decrypt)
+    
+    if DEBUG_MODE:
+        print_section_header("DECRYPTION RESULT")
+        print_binary_data("Decrypted Plaintext", decrypted_plaintext)
+        print_binary_data("Original Plaintext", P)
+    else:
+        # Convert decrypted bits back to hex for display
+        decrypted_bytes = bytearray()
+        for i in range(0, len(decrypted_plaintext), 8):
+            byte_bits = decrypted_plaintext[i:i + 8]
+            byte_value = sum(bit << (7 - j) for j, bit in enumerate(byte_bits))
+            decrypted_bytes.append(byte_value)
+        decrypted_hex = ''.join(f'{byte:02X}' for byte in decrypted_bytes)
+        print(f"  → Decrypted: {decrypted_hex}")
 
-    #Perform DES decryption to verify
-    #print("🔓 Running DES decryption to verify...")
-    #decrypted_plaintext = DES_decrypt(ciphertext, K)
-    #print_section_header("DECRYPTION RESULT")
-    #print_binary_data("Decrypted Plaintext", decrypted_plaintext)
-    #print_binary_data("Original Plaintext", P)
-    ##Verify that decryption worked
-    #if decrypted_plaintext == P:
-    #   print_section_header("✅ SUCCESS")
-    #   print("🎉 DES encryption and decryption completed successfully!")
-    #   print("✅ Decrypted plaintext matches original plaintext!")
-    #else:
-    #   print_section_header("❌ ERROR")
-    #   print("💥 DES encryption/decryption failed!")
-    #   print("❌ Decrypted plaintext does NOT match original!")
+    # Verify that decryption worked
+    print_section_header("VERIFICATION")
+    if decrypted_plaintext == P:
+        print("✅ SUCCESS: DES encryption and decryption completed successfully!")
+        print("✅ Decrypted plaintext matches original plaintext!")
+    else:
+        print("❌ ERROR: DES encryption/decryption failed!")
+        print("❌ Decrypted plaintext does NOT match original!")

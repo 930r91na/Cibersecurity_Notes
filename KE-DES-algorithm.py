@@ -47,6 +47,17 @@ def removeParityBit(Kab):
             KabOf56bits.append(Kab[i])
     return KabOf56bits
 
+
+PC1_table = [
+        57, 49, 41, 33, 25, 17,  9,  1,
+        58, 50, 42, 34, 26, 18, 10,  2,
+        59, 51, 43, 35, 27, 19, 11,  3,
+        60, 52, 44, 36, 63, 55, 47, 39,
+        31, 23, 15,  7, 62, 54, 46, 38,
+        30, 22, 14,  6, 61, 53, 45, 37,
+        29, 21, 13,  5, 28, 20, 12,  4
+]
+
 # Apply PC-1 (Permuted Choice 1)
 def applyPC1(Kab64bits):
     # PC-1 permutation table (selects and rearranges 56 bits from 64-bit key)
@@ -108,15 +119,22 @@ def applyPC2(Ci, Di):
 def oddEvenBitTransformation(Kab):
     """
     KE-DES Enhancement: Apply odd-even bit transformation
-    In every even bit position, 1 and 0 will be replaced by odd bit position
+    Every odd bit position will be moved to the first positions and every even bit position will be moved to the last positions.
+    This according to the PC1 
     """
     for i in range(len(Kab)):
-        # If the position is even (0-indexed), replace it with the next odd position
-        if i % 2 == 0 and i < len(Kab) - 1:
-            Kab[i] = 0
-        # If the position is odd (0-indexed) and not the first, replace it with the previous even position  
-        elif i % 2 != 0 and i > 0:
-            Kab[i] = 1
+        odd = 1
+        even = 29
+        Kab_temp = Kab.copy()
+        # EVEN
+        if PC1_table[i] % 2 == 0 and i < len(Kab) - 1:
+            Kab[even] = Kab_temp[i]
+            even += 1
+        # ODD
+        else:
+            Kab[odd] = Kab_temp[i]
+            odd += 1
+
 
 def generateSubkeys(Kab):
     # Apply PC-1 directly to 64-bit key (PC-1 automatically selects non-parity bits)
@@ -268,43 +286,43 @@ def apply_P_permutation(block32):
 # The 8 constant bits from PC-1 (parity bit positions from original 64-bit key)
 PC1_constant_positions = [8, 16, 24, 32, 40, 48, 56, 64]
 
-def apply_KD(R, subkey_K, original_key_64bits):
+PC2_subkey_positions = [9, 18, 27, 36, 15, 22, 29, 4]  # First 8 bits of PC-2
+
+def apply_KD(R, subkey_K, permutedChoice1):
     """
     Apply the K-D transformation to create 48-bit input for Feistel function.
     
     Args:
         R: 32-bit right half of data
         subkey_K: 48-bit subkey for current round  
-        original_key_64bits: Original 64-bit key for extracting PC-1 constant bits
+        permutedChoice1: 56-bit key after PC-1 permutation
     
     Returns:
         48-bit result combining PC-1 constant bits, R data, and PC-2 subkey bits
     """
 
     # Get 8 constant bits from original key (parity bit positions)
-    pc1_constant_bits = []
-    for pos in PC1_constant_positions:
-        pc1_constant_bits.append(original_key_64bits[pos - 1])  # Convert to 0-indexed
+    pc1_bits = [permutedChoice1[pos - 1] for pos in PC1_constant_positions]
     
-    # Get 8 bits from PC-2 subkey (first 8 bits of the subkey)
-    pc2_bits = subkey_K[:8]
-    
+    # Get 8 bits from PC-2 subkey for the positions defined in PC2_subkey_positions
+    pc2_bits = [subkey_K[pos - 1] for pos in PC2_subkey_positions]
+
     # Combine: 8 PC-1 bits + 32 R bits + 8 PC-2 bits = 48 bits
-    kd_result = pc1_constant_bits + R + pc2_bits
+    kd_result = pc1_bits + R + pc2_bits
     
     return kd_result
 
 # KE-DES Feistel function that uses K-D instead of expansion
-def feistel_function_KD(R, K, original_key_64bits):
+def feistel_function_KD(R, K, pc1):
     """KE-DES Feistel function that uses K-D transformation instead of expansion."""
     
-    print("      🔄 KE-DES FEISTEL FUNCTION DETAILS")
+    print(" KE-DES FEISTEL FUNCTION DETAILS")
     print_binary_data("      Input R", R, show_hex=False)
     print_binary_data("      Input K", K, show_hex=False)
     
     # Step 1: Apply K-D transformation instead of expansion
-    kd_result = apply_KD(R, K, original_key_64bits)
-    print("\n      🔑 K-D Transformation:")
+    kd_result = apply_KD(R, K, pc1)
+    print("\n K-D Transformation:")
     print_binary_data("      K-D result", kd_result, show_hex=False)
 
     # Step 2: XOR with the subkey K
@@ -313,7 +331,7 @@ def feistel_function_KD(R, K, original_key_64bits):
     print_binary_data("      XOR result", xor_result, show_hex=False)
     
     # Step 3: Apply the S-boxes
-    print("\n      📦 S-BOX SUBSTITUTIONS:")
+    print("\n S-BOX SUBSTITUTIONS:")
     sbox_output = []
     for i in range(8):
         block = xor_result[i*6:(i+1)*6]
@@ -347,12 +365,12 @@ def feistel_function_KD(R, K, original_key_64bits):
         sbox_output.extend([(sbox_value >> j) & 1 for j in reversed(range(4))])
     
     # Step 4: Apply the P permutation (CRITICAL for DES security!)
-    print("\n      🔄 P-PERMUTATION:")
+    print("\n  P-PERMUTATION:")
     print_binary_data("      Before P", sbox_output, show_hex=False)
     
     # Apply P-permutation to the 32-bit S-box output
     p_output = apply_P_permutation(sbox_output)
-    print_binary_data("      After P", p_output, show_hex=False)
+    print_binary_data(" After P", p_output, show_hex=False)
     
     return p_output
 
@@ -376,15 +394,8 @@ def divide_text(chunk64bits):
 # 9. Repeat steps 3 to 8 for 16 rounds (same as DES)
 # 10. Finally, apply the inverse initial permutation (IP-1) to get the ciphertext (same as DES)
 
-def KE_DES_encrypt(P, Kab):
-    """Encrypts a 64-bit plaintext P using the 64-bit key Kab."""
-    # Generate subkeys using the binary key 
-    # Count the time taken to generate the subkeys
-    start_time = time.time()
-    subkeys = generateSubkeys(Kab)
-    end_time = time.time()
-    print(f"Subkey generation time: {end_time - start_time:.6f} seconds")
-
+def KE_DES_encrypt(P, subkeys, Kab):
+    """Encrypts a 64-bit plaintext P using pre-generated subkeys."""
     print_section_header("DES ENCRYPTION PROCESS")
     
     # Initial Permutation (IP)
@@ -449,10 +460,8 @@ def KE_DES_encrypt(P, Kab):
 # 8. New Li = R(i-1) (same as DES)
 # 9. Repeat steps 3 to 8 for 16 rounds with subkeys in reverse order (same as DES)
 # 10. Finally, apply the inverse initial permutation (IP-1) to get the plaintext (same as DES)
-def KE_DES_decrypt(C, Kab):
-    """Decrypts a 64-bit ciphertext C using the 64-bit key Kab."""
-    # Decryption process is similar to encryption but with subkeys applied in reverse order
-    subkeys = generateSubkeys(Kab)[::-1]  # Reverse the subkeys for decryption
+def KE_DES_decrypt(C, subkeys, Kab):
+    """Decrypts a 64-bit ciphertext C using pre-generated subkeys (in reverse order)."""
 
     # Initial Permutation (IP)
     permuted_C = apply_IP(C)
@@ -478,8 +487,6 @@ def KE_DES_decrypt(C, Kab):
         print_binary_data("L", L)
         print_binary_data("R", R)
 
-    # IMPORTANT: In DES, after the 16th round, we combine R + L (not L + R)
-    # This is because there's no swap after the final round
     combined = R + L
 
     # Apply the inverse initial permutation (IP-1) to get the plaintext
@@ -493,7 +500,7 @@ if __name__ == "__main__":
     print_section_header("KE-DES ALGORITHM TEST", '=')
     
     plaintext = "The Cipher Block Chaining (CBC) mode encrypts a preprocessed block of a message instead of an original message block, where the preprocessed block is formed through exclusive-ORing the original message block with a cipher data block produced from encrypting the previous message block. In the case of the first preprocessed block, a data block called initialization vector is used for exclusive Ring operation with the first message block. In other words, CBC encryption is a process of chaining successive cipher and message blocks together until the last message block is encrypted."
-    plaintext = plaintext[:8] 
+    #plaintext = plaintext[:8] 
     expected_ciphertext_hex = 0xCB56922039AE9D6B40B0F68B26228259EE3366A2EC8C19E116DA8A4A34BA26FDE7CE6C3194F128E9C1FF5769282676EDAA4F814A9C7768C54D94B689D2491A81409A17F3F431C6FE6366C9AB3AD12AF6620A4542AD0B85C9F36697C8A0434DD8FD7A251B9127FC4E276083692B0C8B9A0BA60B240795AD8CEF00D08F5B07D5CC3BB03A1444B5DD
     expected_ciphertext_hex += 0x033323B0B250E1691F464C99734F45A8FE2226339E4E431828EA7C21FE07F6DE4C8C76E395E4556AC02A9CB2B8F3AD3183780B3AE5E64B0A0A06587A22BBDEE7ED7D21FDB6455479367EB0AC33B9B03991A9B969808E9F11779226AC25D776935EA6403FB30F8CF79D11A02BAC7EDD9EDD07E83E382B567D5E6A332FDB995EF98176EE52AB96660B5511AF9B9931A9610D69951520ACEB89A9D448A264235DAB83C43ABAF03FE5C0CDF4C25F309839B8B6F6F331D9630D2AD3E2AD146B106874F51D0D22B010D0F6A1C90A1E08E78B65F9D4E2C329975807CAB5832D12203C3641A4962DE8C05E6EB1ED429AD115E723063B2DC27E6B8C26DE51876FBC0C6CB07FD2E2C0AF71BE69A32092C6B1C0124
     expected_ciphertext_hex += 0xEA88ECBED998D496FD9DC5A0D0659AB575A85593B220FB32B94A366D2A458C17487AE3EA801D0743D57FDDA
@@ -506,6 +513,14 @@ if __name__ == "__main__":
 
     # Convert key to binary (64 bits)
     K = [(key_hex >> i) & 1 for i in reversed(range(64))]
+
+    # Generate subkeys once for all blocks
+    print_section_header("KEY GENERATION FOR ALL BLOCKS")
+    start_time = time.time()
+    subkeys = generateSubkeys(K)
+    end_time = time.time()
+    print(f"Total subkey generation time: {end_time - start_time:.6f} seconds")
+    print(f"Generated {len(subkeys)} subkeys for reuse across all blocks")
 
     # Convert plaintext to bytes and then process in 64-bit (8-byte) blocks
     print_section_header("ENCRYPTION")
@@ -535,19 +550,18 @@ if __name__ == "__main__":
         print(f"  Text: '{plaintext[i:i+8] if i < len(plaintext) else 'padding'}'")
         print_binary_data("Plaintext Block", block_bits)
         
-        cipher_block = KE_DES_encrypt(block_bits, K)
+        cipher_block = KE_DES_encrypt(block_bits, subkeys, K)
         cipher_calculated.extend(cipher_block)
         print_binary_data(f"Cipher Block {block_count}", cipher_block)
 
     print_section_header("FINAL CIPHERTEXT")
-    # print_binary_data("Ciphertext", cipher_calculated)
-    
-    # Convert calculated cipher to hex for comparison
-    expected_hex_str = hex(expected_ciphertext_hex)[2:].upper()  # Remove '0x' and convert to uppercase
     
 
     # Decryption Test
     print_section_header("DECRYPTION")
+    # Create reversed subkeys for decryption
+    subkeys_decrypt = subkeys[::-1]  # Reverse the subkeys for decryption
+    
     decrypted_calculated = []
     block_count = 0
     for i in range(0, len(cipher_calculated), 64):
@@ -556,7 +570,7 @@ if __name__ == "__main__":
         print_step_header(block_count, f"Block {block_count} Decryption")
         print_binary_data("Cipher Block", cipher_block)
         
-        decrypted_block = KE_DES_decrypt(cipher_block, K)
+        decrypted_block = KE_DES_decrypt(cipher_block, subkeys_decrypt, K)
         decrypted_calculated.extend(decrypted_block)
         print_binary_data(f"Decrypted Block {block_count}", decrypted_block)
 
@@ -569,6 +583,13 @@ if __name__ == "__main__":
         decrypted_bytes.append(byte_value)
 
     print(f"Decrypted text: '{decrypted_bytes.decode('utf-8', errors='ignore')}'")
+
+
+    # TEST with paper example ciphertext
+    print_section_header("CIPHERTEXT VERIFICATION")
+    # Convert calculated cipher to hex for comparison
+    expected_hex_str = hex(expected_ciphertext_hex)[2:].upper()  # Remove '0x' and convert to uppercase
+
     #print(f"Calculated hex: 0x{cipher_calculated}")
     #print(f"Expected hex:   0x{expected_hex_str}")
     #print(f"Calculated length: {len(cipher_calculated)} hex digits ({len(cipher_calculated)} bits)")

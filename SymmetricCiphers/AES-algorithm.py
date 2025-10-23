@@ -174,7 +174,57 @@ def shift_rows(state):
 # The columns are mixed using a linear transformation
 # This step provides additional diffusion by combining the bytes in each column
 
+# The state matrix from the previous approach is the input of the following
+# 4 x 4 matrix multiplication in GF(2^8) (xor & and operations)
+# The state matrix will be multiplied by another fixed matrix
+# The fixed matrix is defined as follows:
 
+forward_transformation_matrix = [
+    [0x02, 0x03, 0x01, 0x01],
+    [0x01, 0x02, 0x03, 0x01],
+    [0x01, 0x01, 0x02, 0x03],
+    [0x03, 0x01, 0x01, 0x02]
+]
+
+inverse_transformation_matrix = [
+    [0x0E, 0x0B, 0x0D, 0x09],
+    [0x09, 0x0E, 0x0B, 0x0D],
+    [0x0D, 0x09, 0x0E, 0x0B],
+    [0x0B, 0x0D, 0x09, 0x0E]
+]
+
+# The forward transformation matrix * the inverse transformation matrix = Identity matrix
+
+def mix_columns(state):
+    # Perform constant matrix x state matrix multiplication
+    new_state = matrix_multiplication(constant_matrix, state)
+    return new_state
+
+def matrix_multiplication(matA, matB):
+    # Example for s0' = (02 * s0) ⊕ (03 * s1) ⊕ (01 * s2) ⊕ (01 * s3)
+    # x * f(x) mod (x^8 + x^4 + x^3 + x + 1) 
+
+
+    # Other technique is based on the fact that 
+    # x^8 mod m(x) = x^4 + x^3 + x + 1 = m(x) - x^8
+
+    # Multiplication by 0x02 or 0x03 can ve implemente as follows:
+    # 1 left shift is equivalent to that multiplication 
+
+    return result
+
+def gf_mult(a, b):
+    # Galois Field (2^8) multiplication
+    p = 0
+    for _ in range(8):
+        if b & 1:
+            p ^= a
+        high_bit_set = a & 0x80
+        a <<= 1
+        if high_bit_set:
+            a ^= 0x1B  # x^8 + x^4 + x^3 + x + 1
+        b >>= 1
+    return p % 256
 
 
 # 4 AddRoundKey Step (ARK Transformation)
@@ -182,4 +232,8 @@ def shift_rows(state):
 # This step is crucial for the security of the cipher as it introduces key dependency into the state
 # The round keys are derived from the original key using a key schedule algorithm
 
-
+def add_round_key(state, round_key):
+    for i in range(4):
+        for j in range(4):
+            state[i][j] ^= round_key[i][j]
+    return state

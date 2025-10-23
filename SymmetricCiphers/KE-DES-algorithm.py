@@ -536,7 +536,7 @@ if __name__ == "__main__":
         print("💡 Use 'python KE-DES-algorithm.py --debug' for detailed step-by-step output")
     
     plaintext = "The Cipher Block Chaining (CBC) mode encrypts a preprocessed block of a message instead of an original message block, where the preprocessed block is formed through exclusive-ORing the original message block with a cipher data block produced from encrypting the previous message block. In the case of the first preprocessed block, a data block called initialization vector is used for exclusive Ring operation with the first message block. In other words, CBC encryption is a process of chaining successive cipher and message blocks together until the last message block is encrypted."
-    plaintext = plaintext[:16]  # Use first 16 characters for testing (2 blocks) 
+    plaintext = plaintext[:8]  # Use first 16 characters for testing (2 blocks) 
     expected_ciphertext_hex = 0xCB56922039AE9D6B40B0F68B26228259EE3366A2EC8C19E116DA8A4A34BA26FDE7CE6C3194F128E9C1FF5769282676EDAA4F814A9C7768C54D94B689D2491A81409A17F3F431C6FE6366C9AB3AD12AF6620A4542AD0B85C9F36697C8A0434DD8FD7A251B9127FC4E276083692B0C8B9A0BA60B240795AD8CEF00D08F5B07D5CC3BB03A1444B5DD
     expected_ciphertext_hex += 0x033323B0B250E1691F464C99734F45A8FE2226339E4E431828EA7C21FE07F6DE4C8C76E395E4556AC02A9CB2B8F3AD3183780B3AE5E64B0A0A06587A22BBDEE7ED7D21FDB6455479367EB0AC33B9B03991A9B969808E9F11779226AC25D776935EA6403FB30F8CF79D11A02BAC7EDD9EDD07E83E382B567D5E6A332FDB995EF98176EE52AB96660B5511AF9B9931A9610D69951520ACEB89A9D448A264235DAB83C43ABAF03FE5C0CDF4C25F309839B8B6F6F331D9630D2AD3E2AD146B106874F51D0D22B010D0F6A1C90A1E08E78B65F9D4E2C329975807CAB5832D12203C3641A4962DE8C05E6EB1ED429AD115E723063B2DC27E6B8C26DE51876FBC0C6CB07FD2E2C0AF71BE69A32092C6B1C0124
     expected_ciphertext_hex += 0xEA88ECBED998D496FD9DC5A0D0659AB575A85593B220FB32B94A366D2A458C17487AE3EA801D0743D57FDDA
@@ -612,44 +612,44 @@ if __name__ == "__main__":
     
 
     # Decryption Test
-    print_section_header("DECRYPTION")
-    # Create reversed subkeys for decryption
-    subkeys_decrypt = subkeys[::-1]  # Reverse the subkeys for decryption
-    
-    decrypted_calculated = []
-    block_count = 0
-    for i in range(0, len(cipher_calculated), 64):
-        block_count += 1
-        cipher_block = cipher_calculated[i:i + 64]
-        
-        if not DEBUG_MODE:
-            cipher_hex = binary_to_hex(cipher_block)
-            print(f"Block {block_count}: {cipher_hex}")
-        else:
-            print_step_header(block_count, f"Block {block_count} Decryption")
-            print_binary_data("Cipher Block", cipher_block)
-        
-        decrypted_block = KE_DES_decrypt(cipher_block, subkeys_decrypt, K)
-        decrypted_calculated.extend(decrypted_block)
-        
-        if DEBUG_MODE:
-            print_binary_data(f"Decrypted Block {block_count}", decrypted_block)
-        else:
-            # Convert decrypted block back to text for summary
-            decrypted_bytes = bytearray()
-            for j in range(0, len(decrypted_block), 8):
-                byte_bits = decrypted_block[j:j + 8]
-                byte_value = sum(bit << (7 - k) for k, bit in enumerate(byte_bits))
-                decrypted_bytes.append(byte_value)
-            block_text = decrypted_bytes.decode('utf-8', errors='ignore')
-            print(f"  → Decrypted: '{block_text}'")
-
-    print_section_header("FINAL DECRYPTED PLAINTEXT")
+    #print_section_header("DECRYPTION")
+    ## Create reversed subkeys for decryption
+    #subkeys_decrypt = subkeys[::-1]  # Reverse the subkeys for decryption
+    #
+    #decrypted_calculated = []
+    #block_count = 0
+    #for i in range(0, len(cipher_calculated), 64):
+    #    block_count += 1
+    #    cipher_block = cipher_calculated[i:i + 64]
+    #    
+    #    if not DEBUG_MODE:
+    #        cipher_hex = binary_to_hex(cipher_block)
+    #        print(f"Block {block_count}: {cipher_hex}")
+    #    else:
+    #        print_step_header(block_count, f"Block {block_count} Decryption")
+    #        print_binary_data("Cipher Block", cipher_block)
+    #    
+    #    decrypted_block = KE_DES_decrypt(cipher_block, subkeys_decrypt, K)
+    #    decrypted_calculated.extend(decrypted_block)
+    #    
+    #    if DEBUG_MODE:
+    #        print_binary_data(f"Decrypted Block {block_count}", decrypted_block)
+    #    else:
+    #        # Convert decrypted block back to text for summary
+    #        decrypted_bytes = bytearray()
+    #        for j in range(0, len(decrypted_block), 8):
+    #            byte_bits = decrypted_block[j:j + 8]
+    #            byte_value = sum(bit << (7 - k) for k, bit in enumerate(byte_bits))
+    #            decrypted_bytes.append(byte_value)
+    #        block_text = decrypted_bytes.decode('utf-8', errors='ignore')
+    #        print(f"  → Decrypted: '{block_text}'")
+#
+    #print_section_header("FINAL DECRYPTED PLAINTEXT")
     # Convert decrypted bits back to bytes
-    decrypted_bytes = bytearray()
-    for i in range(0, len(decrypted_calculated), 8):
-        byte_bits = decrypted_calculated[i:i + 8]
-        byte_value = sum(bit << (7 - j) for j, bit in enumerate(byte_bits))
-        decrypted_bytes.append(byte_value)
-
-    print(f"Decrypted text: '{decrypted_bytes.decode('utf-8', errors='ignore')}'")
+    #decrypted_bytes = bytearray()
+    #for i in range(0, len(decrypted_calculated), 8):
+    #    byte_bits = decrypted_calculated[i:i + 8]
+    #    byte_value = sum(bit << (7 - j) for j, bit in enumerate(byte_bits))
+    #    decrypted_bytes.append(byte_value)
+#
+    #print(f"Decrypted text: '{decrypted_bytes.decode('utf-8', errors='ignore')}'")

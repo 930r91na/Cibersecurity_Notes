@@ -294,85 +294,92 @@ def playfair_cipher_decrypt(ciphertext, key):
     return plaintext
 
 if __name__ == "__main__":
-    print("Substitution Ciphers module loaded. Implement specific ciphers as needed.")
-    # Example usage caesar cipher
-    print("\n=== Caesar Cipher Test ===")
-    plaintext = "meet me after the toga party"
-    shift = 3
-    print("Plaintext:", plaintext)
-    encrypted = caesar_cipher_encrypt(plaintext, shift)
-    print("Encrypted:", encrypted)
-    decrypted = caesar_cipher_decrypt(encrypted, shift)
-    print("Decrypted:", decrypted)
-
+    #print("Substitution Ciphers module loaded. Implement specific ciphers as needed.")
+    ## Example usage caesar cipher
+    #print("\n=== Caesar Cipher Test ===")
+    #plaintext = "meet me after the toga party"
+    #shift = 3
+    #print("Plaintext:", plaintext)
+    #encrypted = caesar_cipher_encrypt(plaintext, shift)
+    #print("Encrypted:", encrypted)
+    #decrypted = caesar_cipher_decrypt(encrypted, shift)
+    #print("Decrypted:", decrypted)
+#
     # Example usage brute-force attack on Caesar cipher
     print("\n=== Brute-Force Attack on Caesar Cipher ===")
-    ciphertext = "phhw ph diwhu wkh wrjd sdubw"
+    ciphertext = "Ishjr oha ohjrlyz hyl aovzl dov ohjr av nla buhbaovypglk hjjlzz av h zfzalt"
+    ciphertext = "Ishjr oha ohjrlyz"
     print("Ciphertext:", ciphertext)
+
     bfa_caesar_cipher(ciphertext)
 
-    # Example usage monoalphabetic substitution cipher
-    print("\n=== Monoalphabetic Substitution Cipher Test ===")
-    plaintext = "ifwewishtoreplaceletters"
-    key = "DKVQFIBJWPESCXHTMYAUOLRGZN"
-    print("Plaintext:", plaintext)
-    encrypted = monoalphabetic_substitution_encrypt(plaintext, key)
-    print("Encrypted:", encrypted)
-    decrypted = monoalphabetic_substitution_decrypt(encrypted, key)
-    print("Decrypted:", decrypted)
+    cyphertext = "hyl aovzl dov ohjr av nla buhbaovypglk hjjlzz av h zfzalt"
+    print("Cyphertext:", cyphertext)
+    caesar_cipher_decrypt(cyphertext, 7)
+#
+    ## Example usage monoalphabetic substitution cipher
+    #print("\n=== Monoalphabetic Substitution Cipher Test ===")
+    #plaintext = "ifwewishtoreplaceletters"
+    #key = "DKVQFIBJWPESCXHTMYAUOLRGZN"
+    #print("Plaintext:", plaintext)
+    #encrypted = monoalphabetic_substitution_encrypt(plaintext, key)
+    #print("Encrypted:", encrypted)
+    #decrypted = monoalphabetic_substitution_decrypt(encrypted, key)
+    #print("Decrypted:", decrypted)
 
     # Example usage frequency analysis
-    print("\n=== Frequency Analysis Test ===")
-    text = "UZQSOVUOHXMOPVGPOZPEVSGZWSZOPFPESXUDBMETSXAIZVUEPHZHMDZSHZWSFPAPPDTSVPQUZWYMXUZUHSXEPYEPOPDZSZUFPOMBZWPFUPZHMDJUDTMOHMQ"
-    text = "iq ifcc vqqr fb rdq vfllcq na rdq cfjwhwz hr bnnb hcc hwwhbsqvqbre hwq vhlq"
-    
-    print(f"Text: {text}")
-    frequency = frequency_analysis(text)
-    print("Frequency Analysis:", frequency)
-    comparison = frequency_analysis_compare(frequency)
+    #print("\n=== Frequency Analysis Test ===")
+    #text = "UZQSOVUOHXMOPVGPOZPEVSGZWSZOPFPESXUDBMETSXAIZVUEPHZHMDZSHZWSFPAPPDTSVPQUZWYMXUZUHSXEPYEPOPDZSZUFPOMBZWPFUPZHMDJUDTMOHMQ"
+    #text = "iq ifcc vqqr fb rdq vfllcq na rdq cfjwhwz hr bnnb hcc hwwhbsqvqbre hwq vhlq"
+    #text = "iqifccvqqrfbrdqvfllcqnardqcfjwhwzhrbnnbhcchwwhbsqvqbrehwqvhlq"
+    #
+    #print(f"Text: {text}")
+    #frequency = frequency_analysis(text)
+    #print("Frequency Analysis:", frequency)
+    #comparison = frequency_analysis_compare(frequency)
 
     # text = "iq ifcc vqqr fb rdq vfllcq na rdq cfjwhwz hr bnnb hcc hwwhbsqvqbre hwq vhlq"
     # https://5-letter-words.com/6-letter-word-finder used for guessoing
 
     # Example usage vigenere cipher
     
-    print("\n=== Vigenère Cipher Test ===")
-    print("\nVigenère Table:")
-    print_vigenere_table()
-
-    plaintext = "wearediscoveredsaveyourself"
-    key = "DECEPTIVE"
-
-    # without autokey system
-    print("Plaintext:", plaintext)
-    print("Key:", key)
-    encrypted = vigenere_cipher_encrypt(plaintext, key)
-    print("Encrypted:", encrypted)
-    decrypted = vigenere_cipher_decrypt(encrypted, key)
-    print("Decrypted:", decrypted)
-
-    # with autokey system
-    # Here the keyword is concatenated with the plaintext to form the key.
-    print("\n=== Vigenère Cipher with Autokey System Test ===")
-    plaintext = "wearediscoveredsaveyourself"
-    key = "DECEPTIVE" + plaintext[:-len("DECEPTIVE")]
-    print("Plaintext:", plaintext)
-    print("Key (Autokey):", key)
-    encrypted = vigenere_cipher_encrypt(plaintext, key)
-    print("Encrypted:", encrypted)
-    decrypted = vigenere_cipher_decrypt(encrypted, key)
-    print("Decrypted:", decrypted)
-
-    # Example usage playfair cipher
-    print("\n=== Playfair Cipher Test ===")
-    key = "crypto"
-    text = "balloons"
-
-    result = playfair_cipher_encrypt(text, key)
-    print(f"The encrypted text: {result}")
-
-    plaintext = playfair_cipher_decrypt(result, key)
-    print(f"The decrypted text: {plaintext}")
+    #print("\n=== Vigenère Cipher Test ===")
+    #print("\nVigenère Table:")
+    #print_vigenere_table()
+#
+    #plaintext = "wearediscoveredsaveyourself"
+    #key = "DECEPTIVE"
+#
+    ## without autokey system
+    #print("Plaintext:", plaintext)
+    #print("Key:", key)
+    #encrypted = vigenere_cipher_encrypt(plaintext, key)
+    #print("Encrypted:", encrypted)
+    #decrypted = vigenere_cipher_decrypt(encrypted, key)
+    #print("Decrypted:", decrypted)
+#
+    ## with autokey system
+    ## Here the keyword is concatenated with the plaintext to form the key.
+    #print("\n=== Vigenère Cipher with Autokey System Test ===")
+    #plaintext = "itisacommunicationservicethatenhancesthesecurityofasystem"
+    #key = "confidentiality" + plaintext[:-len("DECEPTIVE")]
+    #print("Plaintext:", plaintext)
+    #print("Key (Autokey):", key)
+    #encrypted = vigenere_cipher_encrypt(plaintext, key)
+    #print("Encrypted:", encrypted)
+    #decrypted = vigenere_cipher_decrypt(encrypted, key)
+    #print("Decrypted:", decrypted)
+#
+    ## Example usage playfair cipher
+    #print("\n=== Playfair Cipher Test ===")
+    #key = "security"
+    #text = "meetmeafterthetogaparty"
+#
+    #result = playfair_cipher_encrypt(text, key)
+    #print(f"The encrypted text: {result}")
+#
+    #plaintext = playfair_cipher_decrypt(result, key)
+    #print(f"The decrypted text: {plaintext}")
     
 
 

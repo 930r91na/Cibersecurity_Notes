@@ -101,8 +101,8 @@ def product_cipher_decrypt(ciphertext, keyword):
     return final_plaintext
 
 if __name__ == "__main__":
-    plaintext = "HOWAREYOU"
-    keyword = "NCBTZQARX"
+    plaintext = "WEAREDISCOVEREDSAVEYOURSELF"
+    keyword =   "ZHBVCXSERTZUIKMNBVGTZUIOLKM"
     
     print("=" * 50)
     print("ENCRYPTION")

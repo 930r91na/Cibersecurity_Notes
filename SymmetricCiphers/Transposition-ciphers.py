@@ -192,12 +192,14 @@ def row_transposition_cipher(mode):
 if __name__ == "__main__":
     # Example usage rail fence cipher
     print("=== Rail Fence Cipher Test ===")
-    plaintext = "meetmeafterthetogaparty"
-    num_rails = 3
-    encrypted = rail_fence_encrypt(plaintext, num_rails)
+    plaintext = "ADATHKRNIWLNHTELSEESOKEEFWAOAIOHSHROOWULRNWIWETRDTFENSL"
+    num_rails = 6
+    
+    decrypted = rail_fence_decrypt(plaintext, num_rails)
+    print("Decrypted:", decrypted)
+
+    encrypted = rail_fence_encrypt(decrypted, num_rails)
     print("Encrypted:", encrypted)
-    #decrypted = rail_fence_decrypt(encrypted, num_rails)
-    #print("Decrypted:", decrypted)
 
     # Example usage row transposition cipher
     print("\n=== Row Transposition Cipher Test ===")

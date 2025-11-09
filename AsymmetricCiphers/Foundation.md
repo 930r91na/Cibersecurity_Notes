@@ -90,7 +90,7 @@ $$a^{p-1} \equiv 1 \pmod{p}$$
 
 **Conditions**:
 - $p$ is prime
-- $\gcd(a, p) = 1$
+- $\gcd(a, p) = 1$ this means a and p are coprimes or relatively primes
 
 **Equivalent Form**: $a^p \equiv a \pmod{p}$ for any integer $a$
 
@@ -107,19 +107,43 @@ $$a^{-1} \equiv a^{p-2} \pmod{p}$$
 - $3^{-1} \equiv 3^{7-2} \equiv 3^5 \equiv 243 \equiv 5 \pmod{7}$
 - Verification: $3 \cdot 5 = 15 \equiv 1 \pmod{7}$ ✓
 
+**Example**: Find $8^{-1} \bmod 17$
+- $8^{-1} \equiv 3^{17-2} \bmod 17 \equiv 8^{15}  \bmod 17 \equiv 15$
+- Verification: $8 \cdot 15 \bmod 17 \equiv 1 $ ✓
+
+#### Second form of the theorem
+
+$$a^{p} \equiv a \pmod{p}$$
+- $a$ and $p$ must not be relatively prime
+
+
+
 ### Euler's Theorem
 
-**Euler's Totient Function**: $\phi(n)$ counts the number of integers from $1$ to $n$ that are coprime to $n$.
+For a module n 
+The complete set of residues is ${0,1,2, ...  n-1}$
+The values in that set that apply $gcd(x_{i}, n) = 1$ then $x_i$ adds to $\phi(n)++$
+
+Therefore...
+
+**Euler's Totient Function**: $\phi(n)$ co
+unts the number of integers from $1$ to $n$ that are coprime to $n$.
 
 **Formula for Prime Powers**:
-- If $p$ is prime: $\phi(p) = p - 1$
+- If $p$ is prime: $\phi(p) = p - 1$. This means all prime number has $p - 1$ relatively prime numbers
+- $\phi(m \cdot n) = \phi(m) \cdot \phi(n)$ where m and n are relatively prime 
+- $\phi(p^{e}) = p^e - p^{e -1}$ 
 - If $p^k$ is a prime power: $\phi(p^k) = p^k - p^{k-1} = p^{k-1}(p-1)$
 - If $n = p \cdot q$ where $p, q$ are distinct primes: $\phi(n) = (p-1)(q-1)$
 
+## Generalization Fermats THeorem
 **Euler's Theorem**: If $\gcd(a, n) = 1$, then:
 $$a^{\phi(n)} \equiv 1 \pmod{n}$$
 
 **Relationship to Fermat**: Euler's theorem generalizes Fermat's Little Theorem (when $n$ is prime, $\phi(n) = n-1$)
+
+
+
 
 #### Applications in RSA
 
@@ -142,6 +166,7 @@ $$c^d \equiv (m^e)^d \equiv m^{ed} \equiv m^{1 + k\phi(n)} \equiv m \cdot (m^{\p
 - $m_1 = c^{d_1} \bmod p$ where $d_1 = d \bmod (p-1)$
 - $m_2 = c^{d_2} \bmod q$ where $d_2 = d \bmod (q-1)$
 - Combine using CRT to get $m$
+
 
 ### Quadratic Residues
 

@@ -44,7 +44,6 @@ from Euclidean_GF_algorithm import extended_euclidean
 
 # The final round does not include the MixColumns step4
 
-
 # AES-128
 # 1 ARK with k0
 # 9 rounds of (SB, SR, MC, ARK with k1 to k9)

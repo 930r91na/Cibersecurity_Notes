@@ -314,8 +314,6 @@ def poly_gcd(fx, gx):
 # Finding the multiplicative inverse in GF(p)
 # If GCD(m, b) = 1 then b has a multiplicative inverse module m
 
-
-
 def extended_euclidean(m, b):
     """Extended Euclidean Algorithm to find the multiplicative inverse of b mod m"""
     a1, a2, a3 = 1, 0, m

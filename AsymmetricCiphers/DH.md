@@ -1,7 +1,7 @@
 # Diffie–Hellman (DH) — concise notes
 
 ## Purpose
-- Establish a shared secret between two parties over an insecure channel.
+- Establish a shared secret between two parties over an insecure channel
 - Provides confidentiality foundation for symmetric encryption; does not provide authentication/confidentiality by itself.
 
 ## Math prerequisites

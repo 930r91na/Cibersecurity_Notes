@@ -85,3 +85,39 @@ Confidentiality, Data Integrity (HMAC hash ), Authentication (hash code) <- Non 
 
 - Connection clousure
  FIN , ACK flags to terminate the connection from server to client and client to server 
+
+
+# Cipher suite selection
+A cipher suite is a combination of algorithms used to negotiate security settings
+
+Some of the options are
+for key exchange algoritm
+RSA
+DH
+ECDH
+ECDHE
+DHE
+PSK
+
+for authentication 
+RSA 
+ECDSA 
+DSA
+
+for bulk encryption 
+AES 
+RC2
+RC4
+3DES
+
+for Hash MAC
+SHA 
+HMAC 
+MD5
+
+
+Cipher suites example  TLS 
+ECDHE-ECDSA-AES128-GCM-SHA256
+
+
+
